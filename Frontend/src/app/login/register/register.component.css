@@ -1,0 +1,40 @@
+.register-container {
+  background-color: white; /* White background */
+  padding: 40px; /* Increased padding */
+  border-radius: 5px;
+  text-align: center;
+  width: 400px; /* Increased width */
+  margin: 50px auto;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+  width: 100px;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+h2 {
+  font-size: 24px; /* Increased font size */
+}
+
+input, button {
+  margin: 10px 0;
+  padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 16px; /* Increased font size */
+}
+
+button {
+  background-color: #4682b4; /* Sky Blue */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 18px; /* Increased font size */
+}
+
+button:hover {
+  background-color: #5f9ea0; /* Powder Blue */
+}

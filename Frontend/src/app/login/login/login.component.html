@@ -1,0 +1,11 @@
+<div class="login-container">
+  <img ngSrc="/src/assets/logo.jpg" alt="Logo" class="logo" height="312" width="312">
+  <h2>Let us help you deal with your problems.</h2>
+  <input type="text" placeholder="Username" [(ngModel)]="username">
+  <input type="password" placeholder="Password" [(ngModel)]="password">
+  <button (click)="login()">Login</button>
+  <div class="links">
+    <a href="#">Forgot your password?</a>
+    <a [routerLink]="['/register']">Don't have an account?</a>
+  </div>
+</div>
