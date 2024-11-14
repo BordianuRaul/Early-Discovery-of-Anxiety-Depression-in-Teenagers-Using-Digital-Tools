@@ -1,1 +1,29 @@
-/* You can add global styles to this file, and also import other style files */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #e6e6fa; /* Light Violet */
+  color: #333;
+}
+
+h2 {
+  color: #6a5acd; /* Shades of Light Violet */
+}
+
+input {
+  margin: 10px 0;
+  padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+button {
+  background-color: #4682b4; /* Sky Blue */
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #5f9ea0; /* Powder Blue */
+}
