@@ -1,0 +1,80 @@
+.grid-view-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.home-button, .search-button {
+  background-color: #4682b4; /* Sky Blue */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.home-button:hover, .search-button:hover {
+  background-color: #5f9ea0; /* Powder Blue */
+}
+
+.search-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.title {
+  text-align: center;
+  font-size: 34px; /* Slightly increased font size */
+  margin: 20px 0;
+  font-family: 'Arial', sans-serif; /* Changed font family */
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px; /* Increased gap between grid items */
+}
+
+.grid-item {
+  background-color: #f0f0f0;
+  padding: 10px; /* Reduced padding */
+  border-radius: 10px;
+  text-align: center;
+  width: 100%;
+  aspect-ratio: 1 / 1; /* Ensures the grid items are square */
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.grid-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.new-entry {
+  background-color: #d3d3d3;
+}
+
+.new-entry-icon {
+  width: 30px; /* Reduced icon size */
+  height: 30px;
+}
+
+.photo {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+}
+
+p {
+  margin-top: 10px;
+  font-size: 20px; /* Slightly increased font size */
+  font-family: 'Arial', sans-serif; /* Changed font family */
+}
