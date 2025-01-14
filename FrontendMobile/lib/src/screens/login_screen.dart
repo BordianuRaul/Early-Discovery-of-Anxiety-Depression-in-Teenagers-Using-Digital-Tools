@@ -9,7 +9,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _usernameOrEmailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   bool _isLoading = false;
@@ -28,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // Replace with your actual login logic
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Logged in as ${_usernameController.text}')),
+          SnackBar(content: Text('Logged in as ${_usernameOrEmailController.text}')),
         );
       });
     }
@@ -36,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _usernameOrEmailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -56,14 +56,14 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               TextFormField(
-                controller: _usernameController,
+                controller: _usernameOrEmailController,
                 decoration: InputDecoration(
-                  labelText: 'Username',
+                  labelText: 'Username or Email',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your username';
+                    return 'Please enter your username or email';
                   }
                   return null;
                 },
