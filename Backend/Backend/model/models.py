@@ -24,7 +24,15 @@ class MoodCheck(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    sentiment = db.Column(db.Integer, nullable=False)  # 0: Depression, 1: Anxiety, 2: Normal
+    sentiment = db.Column(db.Integer, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     user = db.relationship('User', backref=db.backref('moods', lazy=True))
+
+class SentimentAnalysis(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)  # Link to a user
+    input_text = db.Column(db.Text, nullable=False)
+    prediction = db.Column(db.Integer, nullable=False)  # 0: Depression, 1: Anxiety, 2: Normal
+    timestamp = db.Column(db.DateTime, default=db.func.current_timestamp())
+
