@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 from flask import Blueprint, request, jsonify, current_app, g
 from service.model_AI import predict_sentiment
 import sqlite3
@@ -13,15 +11,6 @@ def get_db():
         db = g._database = sqlite3.connect(current_app.config['DATABASE'])
         db.row_factory = sqlite3.Row  # Allows for dictionary-like access to rows
     return db
-=======
-from flask import Blueprint, request, jsonify
-
-from model.models import db, SentimentAnalysis
-from service.model_AI import predict_sentiment
-
-mood_bp = Blueprint('mood_routes', __name__)
-
->>>>>>> 2d7f90fe350b38b7d7f714a1bb23af6be6b7c538
 
 @mood_bp.route('/predict', methods=['POST'])
 def predict():
@@ -29,7 +18,6 @@ def predict():
         # Extract JSON payload
         data = request.get_json()
         texts = data.get('sentences')
-<<<<<<< HEAD
 
         # Validate input
         if not texts or not isinstance(texts, list):
@@ -72,23 +60,3 @@ def close_connection(exception):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
-=======
->>>>>>> parent of 2d7f90f (AI model API; DB doesn't)
-=======
-        user_id = data.get('user_id', None)
-
-        if not texts or not isinstance(texts, list):
-            return jsonify({'error': 'Invalid input. Provide a list of sentences.'}), 400
-        try:
-            predictions = predict_sentiment(texts)
-            for text, pred in zip(texts, predictions):
-                analysis = SentimentAnalysis(user_id=user_id, input_text=text, prediction=pred)
-                db.session.add(analysis)
-            db.session.commit()
-            return jsonify({'predictions': predictions.tolist()}),
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
->>>>>>> 2d7f90fe350b38b7d7f714a1bb23af6be6b7c538
