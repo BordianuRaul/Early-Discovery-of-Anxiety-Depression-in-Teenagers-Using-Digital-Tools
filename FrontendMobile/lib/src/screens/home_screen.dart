@@ -1,21 +1,29 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:frontend_mobile/src/screens/journal_input_screen.dart';
+
+import '../model/userModel.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: Text('Home', style: CupertinoTheme.of(context).textTheme.navTitleTextStyle),
-        backgroundColor: CupertinoColors.systemIndigo, // Change AppBar color
+    final userId = Provider.of<UserModel>(context).userId;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Home'),
       ),
-      child: Center(
-        child: CupertinoButton.filled(
-          onPressed: () => _navigateToJournalInputScreen(context),
-          child: Text(
-            'Go to Journal Page',
-            style: TextStyle(fontSize: 18.0),
-          ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text('User ID: $userId', style: TextStyle(fontSize: 18.0)),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: () => _navigateToJournalInputScreen(context),
+              child: Text('Go to Journal Page'),
+            ),
+          ],
         ),
       ),
     );
@@ -25,7 +33,7 @@ class HomeScreen extends StatelessWidget {
   void _navigateToJournalInputScreen(BuildContext context) {
     Navigator.push(
       context,
-      CupertinoPageRoute(builder: (context) => JournalInputScreen()),
+      MaterialPageRoute(builder: (context) => JournalInputScreen()),
     );
   }
 }

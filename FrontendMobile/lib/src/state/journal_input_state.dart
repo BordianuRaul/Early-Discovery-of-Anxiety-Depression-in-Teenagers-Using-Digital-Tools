@@ -1,7 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:frontend_mobile/src/screens/journal_input_screen.dart';
-import '../model/journal.dart';
+
+import '../model/journalModel.dart';
+import '../model/userModel.dart';
 
 class JournalInputState extends State<JournalInputScreen> {
   // Controller to manage the input text
@@ -56,17 +61,18 @@ class JournalInputState extends State<JournalInputScreen> {
   // Function to handle the complete day action
   void _completeDay() async {
     String content = _controller.text;
-    if (content.isNotEmpty) {
+    final userId = Provider.of<UserModel>(context, listen: false).userId;
+    if (content.isNotEmpty && userId != null) {
       // Create a Journal object and save the content
-      Journal journal = Journal(content: content);
+      Journal journal = Journal(userId: userId, content: content);
 
       // Make an API call to save the journal content
       final response = await http.post(
-        Uri.parse('https://http://10.0.2.2:5000/auth/addJournalDay'),
+        Uri.parse('http://10.0.2.2:5000/journal/addJournalDay'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: journal.toJson(),
+        body: jsonEncode(journal.toJson()),
       );
 
       if (response.statusCode == 201) {
