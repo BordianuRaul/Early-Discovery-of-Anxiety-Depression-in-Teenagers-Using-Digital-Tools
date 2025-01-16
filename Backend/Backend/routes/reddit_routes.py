@@ -1,19 +1,11 @@
 from flask import Blueprint, redirect, request, url_for, session, jsonify, current_app, g
 from service.reddit_service import get_auth_url, fetch_token, fetch_user_profile, fetch_user_activity, analyze_sentiment
-from service.model_AI import predict_sentiment
+from service.model_service import predict_sentiment
 from model.models import User, Post, Comment
-import sqlite3
+from model.database import get_db
 
 reddit_bp = Blueprint('reddit_routes', __name__)
 STATE = 'secure_random_state'
-
-# helper to ease access to tht db
-def get_db():
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = sqlite3.connect(current_app.config['DATABASE'])
-        db.row_factory = sqlite3.Row  # Allows for dictionary-like access to rows
-    return db
 
 @reddit_bp.route('/')
 def home():
@@ -24,7 +16,7 @@ def home():
 
 @reddit_bp.route('/login')
 def login():
-    return redirect(get_auth_url())
+    return get_auth_url()
 
 @reddit_bp.route('/callback')
 def callback():
@@ -44,59 +36,66 @@ def callback():
 def analyze():
     access_token = session.get('access_token')
     if not access_token:
-        return redirect(url_for('reddit_routes.login'))
+        return jsonify({"error": "User not logged in"}), 401
 
     user_response = fetch_user_profile(access_token)
     if user_response.status_code != 200:
-        return f"Error fetching user profile: {user_response.text}", user_response.status_code
+        return jsonify({"error": f"Error fetching user profile: {user_response.text}"}), user_response.status_code
 
     user_data = user_response.json()
     username = user_data.get('name')
 
     db = get_db()
     cursor = db.cursor()
-    cursor.execute('INSERT OR IGNORE INTO users (username) VALUES (?)', (username,))
-    db.commit()
     cursor.execute('SELECT id FROM users WHERE username = ?', (username,))
-    user_id = cursor.fetchone()['id']
+    user_row = cursor.fetchone()
+    if user_row is None:
+        return jsonify({"error": "User not found in the database"}), 404
+    user_id = user_row['id']
 
-    activity_response = fetch_user_activity(username, access_token)
-    if activity_response.status_code != 200:
-        return f"Error fetching user activity: {activity_response.text}", activity_response.status_code
+    activity_responses = fetch_user_activity(username, access_token)
+    overview_data = activity_responses['overview']
+    upvoted_data = activity_responses['upvoted']
+    downvoted_data = activity_responses['downvoted']
 
-    activity_data = activity_response.json()
     posts = []
     comments = []
+    upvoted = []
+    downvoted = []
     sentiment_scores = []
 
-    for item in activity_data.get('data', {}).get('children', []):
-        if item['kind'] == 't3':  # Post
+    for item in overview_data.get('data', {}).get('children', []):
+        if item.get('kind') == 't3':  # Post
             post_data = item['data']
-            posts.append(post_data)
             sentiment_score = analyze_sentiment(post_data.get('title', ''))
+            post_data['sentiment_score'] = sentiment_score
+            posts.append(post_data)
             sentiment_scores.append(sentiment_score)
             cursor.execute('INSERT INTO posts (user_id, title, sentiment_score) VALUES (?, ?, ?)',
                            (user_id, post_data.get('title', ''), sentiment_score))
-        elif item['kind'] == 't1':  # Comment
+        elif item.get('kind') == 't1':  # Comment
             comment_data = item['data']
-            comments.append(comment_data)
             sentiment_score = analyze_sentiment(comment_data.get('body', ''))
+            comment_data['sentiment_score'] = sentiment_score
+            comments.append(comment_data)
             sentiment_scores.append(sentiment_score)
             cursor.execute('INSERT INTO comments (user_id, body, sentiment_score) VALUES (?, ?, ?)',
                            (user_id, comment_data.get('body', ''), sentiment_score))
 
+    for item in upvoted_data.get('data', {}).get('children', []):
+        if 'kind' in item:
+            item_data = item['data']
+            item_data['vote'] = 'upvoted'
+            upvoted.append(item_data)
+
+    for item in downvoted_data.get('data', {}).get('children', []):
+        if 'kind' in item:
+            item_data = item['data']
+            item_data['vote'] = 'downvoted'
+            downvoted.append(item_data)
+
     db.commit()
     db.close()
-
-    # predictions of the concatenated collected texts
-    post_texts = [post['title'] for post in posts]
-    comment_texts = [comment['body'] for comment in comments]
-    all_texts = post_texts + comment_texts
-    predictions = predict_sentiment(all_texts)
-
-    # mapping the predictions of the model with the posts and comments
-    post_predictions = predictions[:len(post_texts)]
-    comment_predictions = predictions[len(post_texts):]
 
     avg_sentiment = sum(sentiment_scores) / len(sentiment_scores) if sentiment_scores else 0
     top_subreddits = {}
@@ -107,18 +106,16 @@ def analyze():
 
     top_subreddits = sorted(top_subreddits.items(), key=lambda x: x[1], reverse=True)[:5]
 
-    return f"""
-        <h1>Analysis for {username}</h1>
-        <p><b>Number of Posts:</b> {len(posts)}</p>
-        <p><b>Number of Comments:</b> {len(comments)}</p>
-        <p><b>Average Sentiment:</b> {avg_sentiment:.2f}</p>
-        <p><b>Top Subreddits:</b> {', '.join([f"{s[0]} ({s[1]} activities)" for s in top_subreddits])}</p>
-        <h2>Posts:</h2>
-        <ul>
-            {''.join([f"<li>{post['title']} - Sentiment: {post_predictions[i]}</li>" for i, post in enumerate(posts)])}
-        </ul>
-        <h2>Comments:</h2>
-        <ul>
-            {''.join([f"<li>{comment['body']} - Sentiment: {comment_predictions[i]}</li>" for i, comment in enumerate(comments)])}
-        </ul>
-    """
+    response_data = {
+        "username": username,
+        "number_of_posts": len(posts),
+        "number_of_comments": len(comments),
+        "average_sentiment": avg_sentiment,
+        "top_subreddits": [{"subreddit": s[0], "activities": s[1]} for s in top_subreddits],
+        "posts": [{"title": post['title'], "sentiment_score": post['sentiment_score']} for post in posts],
+        "comments": [{"body": comment['body'], "sentiment_score": comment['sentiment_score']} for comment in comments],
+        "upvoted": [{"title": item.get('title', ''), "body": item.get('body', ''), "vote": item['vote']} for item in upvoted],
+        "downvoted": [{"title": item.get('title', ''), "body": item.get('body', ''), "vote": item['vote']} for item in downvoted]
+    }
+
+    return jsonify(response_data)

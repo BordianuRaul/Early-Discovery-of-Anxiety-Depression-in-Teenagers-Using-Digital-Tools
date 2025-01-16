@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app, g
-from service.model_AI import predict_sentiment
+from service.model_service import predict_sentiment
 import sqlite3
 
 mood_bp = Blueprint('mood_routes', __name__)

@@ -3,14 +3,15 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import '../screens/home_screen.dart';
-import '../screens/login_screen.dart';
 import '../screens/register_screen.dart';
+import '../screens/login_screen.dart';
 
 class LoginState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _usernameOrEmailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _isPasswordVisible = false;
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
@@ -42,7 +43,7 @@ class LoginState extends State<LoginScreen> {
             MaterialPageRoute(builder: (context) => HomeScreen()),
           );
         } else {
-          final error = jsonDecode(response.body)['error'];
+          final error = jsonDecode(response.body)['error'] ?? 'An error occurred';
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Login failed: $error')),
           );
@@ -122,13 +123,23 @@ class LoginState extends State<LoginScreen> {
                         decoration: InputDecoration(
                           labelText: 'Password',
                           prefixIcon: Icon(Icons.lock),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isPasswordVisible = !_isPasswordVisible;
+                              });
+                            },
+                          ),
                           filled: true,
                           fillColor: Colors.grey[200],
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12.0),
                           ),
                         ),
-                        obscureText: true,
+                        obscureText: !_isPasswordVisible,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your password';
@@ -145,7 +156,8 @@ class LoginState extends State<LoginScreen> {
                             ? CircularProgressIndicator()
                             : ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(horizontal: 50.0, vertical: 12.0), backgroundColor: Colors.blueAccent,
+                            padding: EdgeInsets.symmetric(horizontal: 50.0, vertical: 12.0),
+                            backgroundColor: Colors.blueAccent,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8.0),
                             ),

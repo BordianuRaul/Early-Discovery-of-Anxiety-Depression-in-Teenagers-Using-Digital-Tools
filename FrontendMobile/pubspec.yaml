@@ -32,6 +32,8 @@ dependencies:
     sdk: flutter
   http: ^0.13.4
   cupertino_icons: ^1.0.8
+  webview_flutter: ^3.0.3
+  url_launcher: ^6.0.20
 
 dev_dependencies:
   flutter_test:

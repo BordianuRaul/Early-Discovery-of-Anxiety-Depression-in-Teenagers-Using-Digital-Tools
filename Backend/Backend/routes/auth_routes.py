@@ -2,16 +2,10 @@
 from flask import Blueprint, request, jsonify, session, g, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
+from model.database import get_db
 
 auth_bp = Blueprint('auth_routes', __name__)
 
-# Helper function to get the database connection
-def get_db():
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = sqlite3.connect(current_app.config['DATABASE'])
-        db.row_factory = sqlite3.Row  # Allows for dictionary-like access to rows
-    return db
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
