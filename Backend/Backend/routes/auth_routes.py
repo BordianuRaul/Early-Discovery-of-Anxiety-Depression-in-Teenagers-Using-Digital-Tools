@@ -1,7 +1,6 @@
 # routes/auth_routes.py
 from flask import Blueprint, request, jsonify, session, g, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
-from model.models import User
 import sqlite3
 
 auth_bp = Blueprint('auth_routes', __name__)
@@ -23,7 +22,7 @@ def register():
     if not username or not password:
         return jsonify({'error': 'Username and password are required.'}), 400
 
-    hashed_password = generate_password_hash(password, method='sha256')
+    hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
 
     db = get_db()
     cursor = db.cursor()

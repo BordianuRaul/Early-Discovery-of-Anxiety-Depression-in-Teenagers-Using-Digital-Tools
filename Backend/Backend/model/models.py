@@ -4,15 +4,14 @@ def initialize_database(db_path):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    # Create users table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT NOT NULL UNIQUE
+            username TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL
         )
     ''')
 
-    # Create posts table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS posts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,7 +22,6 @@ def initialize_database(db_path):
         )
     ''')
 
-    # Create comments table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS comments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
