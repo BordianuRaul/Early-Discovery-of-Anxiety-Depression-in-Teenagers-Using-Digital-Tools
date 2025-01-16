@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:provider/provider.dart';
 
+import '../model/userModel.dart';
 import '../screens/login_screen.dart';
 import '../screens/register_screen.dart';
 
@@ -33,6 +35,10 @@ class RegisterState extends State<RegisterScreen> {
         });
 
         if (response.statusCode == 201) {
+          final data = jsonDecode(response.body);
+          final userId = data['user_id'];
+          Provider.of<UserModel>(context, listen: false).setUserId(userId.toString());
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('User registered successfully')),
           );
