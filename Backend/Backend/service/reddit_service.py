@@ -43,13 +43,31 @@ def fetch_user_profile(access_token):
     return response
 
 def fetch_user_activity(username, access_token):
+    """
+    Fetches the Reddit user's activity (overview, upvoted, downvoted).
+    """
     headers = {
         'Authorization': f'Bearer {access_token}',
         'User-Agent': USER_AGENT
     }
-    response = requests.get(f"{API_BASE_URL}/user/{username}/overview", headers=headers)
-    print(f"User activity response: {response.status_code} - {response.text}")
-    return response
+
+    overview_response = requests.get(f"{API_BASE_URL}/user/{username}/overview", headers=headers)
+    upvoted_response = requests.get(f"{API_BASE_URL}/user/{username}/upvoted", headers=headers)
+    downvoted_response = requests.get(f"{API_BASE_URL}/user/{username}/downvoted", headers=headers)
+
+    # Check response status and parse JSON
+    if overview_response.status_code != 200:
+        raise Exception(f"Error fetching overview: {overview_response.text}")
+    if upvoted_response.status_code != 200:
+        raise Exception(f"Error fetching upvoted: {upvoted_response.text}")
+    if downvoted_response.status_code != 200:
+        raise Exception(f"Error fetching downvoted: {downvoted_response.text}")
+
+    return {
+        'overview': overview_response.json(),  # Return parsed JSON
+        'upvoted': upvoted_response.json(),   # Return parsed JSON
+        'downvoted': downvoted_response.json()  # Return parsed JSON
+    }
 
 def analyze_sentiment(text):
     return TextBlob(text).sentiment.polarity

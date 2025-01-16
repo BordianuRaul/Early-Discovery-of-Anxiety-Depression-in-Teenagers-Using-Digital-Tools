@@ -16,7 +16,9 @@ def initialize_database(db_path):
         CREATE TABLE IF NOT EXISTS posts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
+            reddit_id TEXT UNIQUE,  -- Unique ID from Reddit
             title TEXT,
+            body TEXT,
             sentiment_score REAL,
             FOREIGN KEY(user_id) REFERENCES users(id)
         )
@@ -26,18 +28,22 @@ def initialize_database(db_path):
         CREATE TABLE IF NOT EXISTS comments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
+            reddit_id TEXT UNIQUE,  -- Unique ID from Reddit
             body TEXT,
             sentiment_score REAL,
             FOREIGN KEY(user_id) REFERENCES users(id)
         )
     ''')
 
-    # Create sentiment_analysis table
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS sentiment_analysis (
+        CREATE TABLE IF NOT EXISTS reactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            input_text TEXT NOT NULL,
-            prediction TEXT NOT NULL
+            user_id INTEGER,
+            reddit_id TEXT UNIQUE,  -- Unique ID from Reddit
+            title TEXT,
+            vote TEXT CHECK(vote IN ('upvote', 'downvote')),
+            sentiment_score REAL,
+            FOREIGN KEY(user_id) REFERENCES users(id)
         )
     ''')
 
@@ -51,6 +57,7 @@ def initialize_database(db_path):
 
     conn.commit()
     conn.close()
+
 
 class User:
     def __init__(self, username):

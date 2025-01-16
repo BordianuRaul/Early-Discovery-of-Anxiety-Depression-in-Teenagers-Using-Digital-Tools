@@ -13,6 +13,8 @@ class RegisterState extends State<RegisterScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
 
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
@@ -48,7 +50,7 @@ class RegisterState extends State<RegisterScreen> {
             MaterialPageRoute(builder: (context) => LoginScreen()),
           );
         } else {
-          final error = jsonDecode(response.body)['error'];
+          final error = jsonDecode(response.body)['error'] ?? 'An error occurred';
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Registration failed: $error')),
           );
@@ -129,13 +131,23 @@ class RegisterState extends State<RegisterScreen> {
                         decoration: InputDecoration(
                           labelText: 'Password',
                           prefixIcon: Icon(Icons.lock),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isPasswordVisible = !_isPasswordVisible;
+                              });
+                            },
+                          ),
                           filled: true,
                           fillColor: Colors.grey[200],
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12.0),
                           ),
                         ),
-                        obscureText: true,
+                        obscureText: !_isPasswordVisible,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter a password';
@@ -152,13 +164,23 @@ class RegisterState extends State<RegisterScreen> {
                         decoration: InputDecoration(
                           labelText: 'Confirm Password',
                           prefixIcon: Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                              });
+                            },
+                          ),
                           filled: true,
                           fillColor: Colors.grey[200],
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12.0),
                           ),
                         ),
-                        obscureText: true,
+                        obscureText: !_isConfirmPasswordVisible,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please confirm your password';
@@ -175,7 +197,8 @@ class RegisterState extends State<RegisterScreen> {
                             ? CircularProgressIndicator()
                             : ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(horizontal: 50.0, vertical: 12.0), backgroundColor: Colors.blueAccent,
+                            padding: EdgeInsets.symmetric(horizontal: 50.0, vertical: 12.0),
+                            backgroundColor: Colors.blueAccent,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8.0),
                             ),
