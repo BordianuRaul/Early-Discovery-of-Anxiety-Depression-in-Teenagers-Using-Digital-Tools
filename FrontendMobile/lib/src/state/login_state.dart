@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:provider/provider.dart';
 
+import '../model/userModel.dart';
 import '../screens/home_screen.dart';
 import '../screens/register_screen.dart';
 import '../screens/login_screen.dart';
@@ -34,6 +36,10 @@ class LoginState extends State<LoginScreen> {
         });
 
         if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          final userId = data['user_id'];
+          Provider.of<UserModel>(context, listen: false).setUserId(userId.toString());
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Logged in successfully')),
           );

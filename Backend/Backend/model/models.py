@@ -47,6 +47,14 @@ def initialize_database(db_path):
         )
     ''')
 
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS journals (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        userId INTEGER,
+        content TEXT NOT NULL
+        )
+    ''')
+
     conn.commit()
     conn.close()
 

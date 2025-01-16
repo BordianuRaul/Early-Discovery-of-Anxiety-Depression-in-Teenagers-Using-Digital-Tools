@@ -1,6 +1,8 @@
 import os
 from flask_cors import CORS
 from flask import Flask, render_template
+
+from Backend.routes.journal_routes import journal_bp
 from routes.mood_routes import mood_bp
 from routes.reddit_routes import reddit_bp
 from routes.auth_routes import auth_bp
@@ -22,6 +24,8 @@ app.register_blueprint(mood_bp, url_prefix='/mood')
 app.register_blueprint(reddit_bp, url_prefix='/reddit')
 app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(analysis_bp, url_prefix="/analysis")
+app.register_blueprint(journal_bp, url_prefix='/journal')
+
 
 @app.route('/')
 def landing_page():
