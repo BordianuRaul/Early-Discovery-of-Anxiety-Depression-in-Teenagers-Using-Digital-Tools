@@ -18,6 +18,8 @@ def home():
 def login():
     return get_auth_url()
 
+from flask import session
+
 @reddit_bp.route('/callback')
 def callback():
     code = request.args.get('code')
@@ -29,8 +31,33 @@ def callback():
     if token_response.status_code != 200:
         return f"Error fetching token: {token_response.text}", token_response.status_code
 
-    session['access_token'] = token_response.json().get('access_token')
+    access_token = token_response.json().get('access_token')
+    session['access_token'] = access_token
+
+    # Fetch Reddit user profile
+    reddit_user_response = fetch_user_profile(access_token)
+    if reddit_user_response.status_code != 200:
+        return f"Error fetching Reddit user profile: {reddit_user_response.text}", reddit_user_response.status_code
+
+    reddit_username = reddit_user_response.json().get('name')
+
+    # Get the currently logged-in app user (e.g., by session or token)
+    app_user_id = session.get('user_id')  # Replace with your own method of fetching the current user ID
+
+    # if not app_user_id:
+    #     return jsonify({"error": "No logged-in user found"}), 401
+
+    # Update the `reddit_username` for the logged-in app user
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+        'UPDATE users SET reddit_username = ? WHERE id = ?',
+        (reddit_username, app_user_id)
+    )
+    db.commit()
+
     return redirect(url_for('reddit_routes.analyze'))
+
 
 @reddit_bp.route('/analyze')
 def analyze():
@@ -38,22 +65,21 @@ def analyze():
     if not access_token:
         return jsonify({"error": "User not logged in"}), 401
 
-    user_response = fetch_user_profile(access_token)
-    if user_response.status_code != 200:
-        return jsonify({"error": f"Error fetching user profile: {user_response.text}"}), user_response.status_code
+    reddit_user_response = fetch_user_profile(access_token)
+    if reddit_user_response.status_code != 200:
+        return jsonify({"error": f"Error fetching user profile: {reddit_user_response.text}"}), reddit_user_response.status_code
 
-    user_data = user_response.json()
-    username = user_data.get('name')
+    reddit_username = reddit_user_response.json().get('name')
 
     db = get_db()
     cursor = db.cursor()
-    cursor.execute('SELECT id FROM users WHERE username = ?', (username,))
+    cursor.execute('SELECT id FROM users WHERE reddit_username = ?', (reddit_username,))
     user_row = cursor.fetchone()
     if user_row is None:
         return jsonify({"error": "User not found in the database"}), 404
     user_id = user_row['id']
 
-    activity_responses = fetch_user_activity(username, access_token)
+    activity_responses = fetch_user_activity(reddit_username, access_token)
     overview_data = activity_responses['overview']
     upvoted_data = activity_responses['upvoted']
     downvoted_data = activity_responses['downvoted']
@@ -107,7 +133,7 @@ def analyze():
     top_subreddits = sorted(top_subreddits.items(), key=lambda x: x[1], reverse=True)[:5]
 
     response_data = {
-        "username": username,
+        "username": reddit_username,
         "number_of_posts": len(posts),
         "number_of_comments": len(comments),
         "average_sentiment": avg_sentiment,
