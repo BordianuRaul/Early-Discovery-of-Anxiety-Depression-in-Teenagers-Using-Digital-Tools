@@ -5,7 +5,7 @@ from model.database import get_db
 
 analysis_bp = Blueprint('analysis_routes', __name__)
 
-@analysis_bp.route('/analyze_user/<int:user_id>', methods=['GET'])
+@analysis_bp.route('/analyze_user/<user_id>', methods=['GET'])
 def analyze_user(user_id):
     """
     Analyze the user's data, including reactions and created content, predict sentiments,
@@ -13,6 +13,12 @@ def analyze_user(user_id):
     """
     db = get_db()
     cursor = db.cursor()
+
+    # Validate user existence
+    cursor.execute("SELECT id FROM users WHERE id = ?", (user_id,))
+    user_exists = cursor.fetchone()
+    if not user_exists:
+        return jsonify({'error': 'User not found.'}), 404
 
     # Fetch user-generated posts and comments
     cursor.execute("SELECT title FROM posts WHERE user_id = ?", (user_id,))
@@ -31,7 +37,10 @@ def analyze_user(user_id):
 
     # Use AI model to predict sentiments
     all_texts = posts + comments + reactions
-    predictions = predict_sentiment(all_texts)
+    try:
+        predictions = predict_sentiment(all_texts)
+    except Exception as e:
+        return jsonify({'error': f'Error in sentiment analysis: {str(e)}'}), 500
 
     # Separate predictions
     post_predictions = predictions[:len(posts)]

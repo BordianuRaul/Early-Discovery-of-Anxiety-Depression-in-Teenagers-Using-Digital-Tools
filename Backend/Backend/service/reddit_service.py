@@ -4,7 +4,7 @@ from textblob import TextBlob
 
 # Reddit app credentials (replace CLIENT_ID with your actual values)
 CLIENT_ID = 'l8YUAHkHjkk2kPrfPFIh-w'
-REDIRECT_URI = 'http://127.0.0.1:5000/reddit/callback'  # Ensure this matches the registered URI
+REDIRECT_URI = 'http://10.0.2.2:5000/reddit/callback'  # Ensure this matches the registered URI
 AUTH_BASE_URL = 'https://www.reddit.com/api/v1/authorize'
 TOKEN_URL = 'https://www.reddit.com/api/v1/access_token'
 API_BASE_URL = 'https://oauth.reddit.com'

@@ -23,10 +23,13 @@ def register():
     try:
         cursor.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, hashed_password))
         db.commit()
+        # Fetch the inserted user ID
+        user_id = cursor.lastrowid
     except sqlite3.IntegrityError:
         return jsonify({'error': 'Username already exists.'}), 400
 
-    return jsonify({'message': 'User registered successfully.'}), 201
+    return jsonify({'message': 'User registered successfully.', 'user_id': user_id}), 201
+
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
@@ -40,10 +43,13 @@ def login():
     db = get_db()
     cursor = db.cursor()
     cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
-    user = cursor.fetchone()
+    user_id = cursor.fetchone()
 
-    if not user or not check_password_hash(user['password'], password):
+    if not user_id or not check_password_hash(user_id['password'], password):
         return jsonify({'error': 'Invalid username or password.'}), 401
 
-    session['user_id'] = user['id']
-    return jsonify({'message': 'Logged in successfully.'}), 200
+    session['user_id'] = user_id['id']
+
+    print(f"User ID in session: {session.get('user_id')}")
+
+    return jsonify({'message': 'Logged in successfully.', 'user_id': user_id['id']}), 200

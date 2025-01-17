@@ -2,7 +2,7 @@ import os
 from flask_cors import CORS
 from flask import Flask, render_template
 
-from Backend.routes.journal_routes import journal_bp
+from routes.journal_routes import journal_bp
 from routes.mood_routes import mood_bp
 from routes.reddit_routes import reddit_bp
 from routes.auth_routes import auth_bp
@@ -17,6 +17,7 @@ app.secret_key = os.getenv('SECRET_KEY')
 
 # SQLite Database Configuration
 app.config['DATABASE'] = 'instance/app.db'
+app.config['SESSION_TYPE'] = 'filesystem'
 
 init_db(app)
 
@@ -33,4 +34,4 @@ def landing_page():
 
 # main app
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
