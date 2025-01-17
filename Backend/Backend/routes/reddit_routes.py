@@ -97,8 +97,8 @@ def analyze():
             post_data['sentiment_score'] = sentiment_score
             posts.append(post_data)
             sentiment_scores.append(sentiment_score)
-            cursor.execute('INSERT INTO posts (user_id, title, sentiment_score) VALUES (?, ?, ?)',
-                           (user_id, post_data.get('title', ''), sentiment_score))
+            # cursor.execute('INSERT INTO posts (user_id, title, sentiment_score) VALUES (?, ?, ?)',
+            #                (user_id, post_data.get('title', ''), sentiment_score))
         elif item.get('kind') == 't1':  # Comment
             comment_data = item['data']
             sentiment_score = analyze_sentiment(comment_data.get('body', ''))

@@ -4,6 +4,8 @@ def initialize_database(db_path):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
+    cursor.execute('''DELETE FROM posts WHERE id BETWEEN 5 AND 9''')
+
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -50,8 +52,9 @@ def initialize_database(db_path):
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS journals (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        userId INTEGER,
-        content TEXT NOT NULL
+        user_id INTEGER,
+        content TEXT NOT NULL,
+        sentiment_score REAL
         )
     ''')
 
