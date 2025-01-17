@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../screens/reddit_callback_screen.dart';
+import 'reddit_tracking_state.dart';
 
 class RedditLoginState extends StatefulWidget {
   @override
@@ -17,6 +19,7 @@ class _RedditLoginState extends State<RedditLoginState> {
     });
 
     try {
+      // Step 1: Initiate Reddit OAuth Login
       final response = await http.get(Uri.parse('http://10.0.2.2:5000/reddit/login'));
 
       setState(() {
@@ -24,15 +27,25 @@ class _RedditLoginState extends State<RedditLoginState> {
       });
 
       if (response.statusCode == 200) {
-        // Extract the authorization URL from the response
-        final authUrl = response.body.trim(); // Ensure no trailing spaces
+        final authUrl = response.body.trim(); // URL to start the OAuth process
         if (authUrl.isNotEmpty) {
-          // Use url_launcher to open the URL
           final Uri url = Uri.parse(authUrl);
+
+          // Step 2: Open the browser to authenticate
           if (await canLaunchUrl(url)) {
             await launchUrl(
               url,
               mode: LaunchMode.externalApplication, // Open in external browser
+            );
+
+            // Step 3: Navigate to the RedditCallbackScreen
+            // Assume the backend redirects to '/callback' after authentication
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    RedditCallbackScreen(callbackUrl: 'http://10.0.2.2:5000/reddit/callback'),
+              ),
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -58,6 +71,7 @@ class _RedditLoginState extends State<RedditLoginState> {
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
